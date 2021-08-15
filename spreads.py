@@ -22,6 +22,7 @@ class Spread(Product):
     def __init__(self,product1:Product,product2:Product):
         self.product1 = product1
         self.product2 = product2
+        self.symbol = f"{product1.symbol}-{product2.symbol}" 
 
     def best_price(self):
         self.BidP = self.product1.BidP - self.product2.AskP
@@ -50,8 +51,8 @@ class Spread(Product):
         return res
 
 class SpreadClient:
-    def __init__(self,futrue_sproducts:Dict[str,Product]) -> None:
-        self.futrue_sproducts = futrue_sproducts
+    def __init__(self,futures_products:Dict[str,Product]) -> None:
+        self.futures_products = futures_products
         self.spread_matrix = {}
         self.make_futures_spreads()
         # print(self.spread_matrix)
@@ -59,25 +60,21 @@ class SpreadClient:
 
     
     def make_futures_spreads(self):
-        i = 0
-        j = 0
-        for symi in self.futrue_sproducts.keys():
-            for symj in self.futrue_sproducts.keys():
-                if i > j+1:
-                    # print(i,j)
-                    producti = self.futrue_sproducts[symi]
-                    productj = self.futrue_sproducts[symj]
+        for i,symi in enumerate(self.futures_products.keys()):
+            for j,symj in enumerate(self.futures_products.keys()):
+                if i > j:
+                    producti = self.futures_products[symi]
+                    productj = self.futures_products[symj]
                     if producti.expiry < productj.expiry:
-                        sym = f"{producti} - {productj}"
+                        sym = f"{symi}-{symj}"
                         self.spread_matrix[sym] = Spread(producti,productj)
                     else:
-                        sym = f"{productj} - {producti}"
+                        sym = f"{symj}-{symi}"
 
                         self.spread_matrix[sym] = Spread(productj,producti)
             
-                j += 1
-            i+=1
-        print(self.spread_matrix)
+
+        # print(self.spread_matrix)
 
     
 
@@ -90,12 +87,12 @@ class SpreadClient:
 
     def update_spread_matrix(self,update:dict):
         sym1 = update['sym']
-        self.futrue_sproducts[sym1].update(update)
-        for symi in self.futrue_sproducts.keys():
-            if self.futrue_sproducts[sym1].expiry < self.futrue_sproducts[symi].expiry:
-                sym = f"{sym1} - {symi}"
+        self.futures_products[sym1].update(update)
+        for symi in self.futures_products.keys():
+            if self.futures_products[sym1].expiry < self.futures_products[symi].expiry:
+                sym = f"{sym1}-{symi}"
             else:
-                sym = f"{symi} - {sym1}"
+                sym = f"{symi}-{sym1}"
             self.spread_matrix[sym].update()
             print(self.spread_matrix[sym].to_dict())
 
