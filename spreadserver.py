@@ -46,7 +46,7 @@ def consumer_products_deribit_stream(spreads:SpreadClient,q: Queue):
 def stream_spread_matrix(spreads:SpreadClient):
     while True:
         sleep(1.5)
-        # pprint(spreads.get_spread_matrix())
+        pprint(spreads.get_spread_matrix())
 
 
 

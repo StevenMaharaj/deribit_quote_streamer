@@ -37,19 +37,34 @@ class TestSpread(unittest.TestCase):
         
 class TestSpreadClient(unittest.TestCase):
     def setUp(self):
-        exchange_info = DeribitClient.get_exchange_info("BTC")
-        self.exchange_info = list(filter(lambda x: x['instrument_name']!="BTC-PERPETUAL",exchange_info))
-        self.symbols = [el['instrument_name'] for el in exchange_info]
-        self.symbols_expiries = [(el['instrument_name'],el['expiration_timestamp']) for el in exchange_info]
+        self.exchange_info = DeribitClient.get_exchange_info("BTC")
+        self.exchange_info = list(filter(lambda x: x['instrument_name']!="BTC-PERPETUAL",self.exchange_info))
+        self.symbols = [el['instrument_name'] for el in self.exchange_info]
+        self.symbols_expiries = [(el['instrument_name'],el['expiration_timestamp']) for el in self.exchange_info]
         self.products = {}
         for sym,expiry in self.symbols_expiries:
             
             self.products[sym] = Product(sym,expiry,does_expire=True)
+            # print(sym)
 
     def test_make_spread_client(self):
         spreads = SpreadClient(self.products)
         self.assertEqual(self.symbols,list(spreads.futures_products.keys()))
-        pprint(spreads.get_spread_matrix())
+        # pprint(spreads.get_spread_matrix())
+    
+    def test_update_spread_client(self):
+        spreads = SpreadClient(self.products)
+        # pprint(spreads.get_spread_matrix())
+        u1 = {'ts': 1629016636149, 'sym': 'BTC-20AUG21', 'BidP': 47319.0, 'BidQ': 2000.0, 'AskP': 47329.5, 'AskQ': 13800.0}
+        u2 = {'ts': 1629016636137, 'sym': 'BTC-25MAR22', 'BidP': 48255.0, 'BidQ': 2000.0, 'AskP': 48275.5, 'AskQ': 720.0}
+        spreads.update_spread_matrix(u1)
+        spreads.update_spread_matrix(u2)
+        
+        # self.assertEqual(self)
+        # pprint(spreads.get_spread_matrix())
+
+
+
 
 
 if __name__ == '__main__':
